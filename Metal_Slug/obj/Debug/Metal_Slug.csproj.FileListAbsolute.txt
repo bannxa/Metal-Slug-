@@ -9,3 +9,14 @@ C:\Users\omarb\OneDrive\Desktop\banna_msa\Year 2\Sem2\Multimedia 232\Metal_Slug\
 C:\Users\omarb\OneDrive\Desktop\banna_msa\Year 2\Sem2\Multimedia 232\Metal_Slug\Metal_Slug\obj\Debug\Metal_Slug.pdb
 C:\Users\omarb\OneDrive\Desktop\banna_msa\Year 2\Sem2\Multimedia 232\Metal_Slug\Metal_Slug\obj\Debug\Metal_Slug.exe.config
 C:\Users\omarb\OneDrive\Desktop\banna_msa\Year 2\Sem2\Multimedia 232\Metal_Slug\Metal_Slug\obj\Debug\Metal_Slug.Form1.resources
+C:\Users\omarb\Metal-Slug-\Metal_Slug\bin\Debug\Metal_Slug.exe.config
+C:\Users\omarb\Metal-Slug-\Metal_Slug\bin\Debug\Metal_Slug.exe
+C:\Users\omarb\Metal-Slug-\Metal_Slug\bin\Debug\Metal_Slug.pdb
+C:\Users\omarb\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.csproj.AssemblyReference.cache
+C:\Users\omarb\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.exe.config
+C:\Users\omarb\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.Form1.resources
+C:\Users\omarb\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.Properties.Resources.resources
+C:\Users\omarb\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.csproj.GenerateResource.cache
+C:\Users\omarb\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.csproj.CoreCompileInputs.cache
+C:\Users\omarb\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.exe
+C:\Users\omarb\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.pdb
