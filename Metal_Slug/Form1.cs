@@ -23,7 +23,7 @@ namespace Metal_Slug
         public int mapstart = 5;
         public int mapend = 705;
         public int flag = 0;
-        public bool IsRight = false;
+        public bool IsRight = true;
         public bool IsLeft = false;
 
 
