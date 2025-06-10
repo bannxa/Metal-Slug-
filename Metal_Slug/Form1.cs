@@ -18,13 +18,17 @@ namespace Metal_Slug
         List<CAdvImgActor> Lwrld = new List<CAdvImgActor>();
         List<CMultiImageActor> LHeroR = new List<CMultiImageActor>();
         List<CMultiImageActor> LHeroL = new List<CMultiImageActor>();
+        List<CMultiImageActor> LHeroIL = new List<CMultiImageActor>();
+        List<CMultiImageActor> LHeroIR = new List<CMultiImageActor>();
         Timer tt = new Timer();
         public int idleframe = 1;
         public int mapstart = 5;
         public int mapend = 705;
-        public int flag = 0;
-        public bool IsRight = true;
+        public int flag = 0;  // for right movement
+        public int flag1 = 0; // for left movement
+        public bool IsRight = false;
         public bool IsLeft = false;
+        public bool LastDirectionIsRight = true;
 
 
 
@@ -33,9 +37,9 @@ namespace Metal_Slug
 
             InitializeComponent();
             this.Paint += Form1_Paint;
-            tt.Interval = 200;
+            tt.Interval = 300;
             tt.Start();
-            //tt.Tick += Tt_Tick;
+            tt.Tick += Tt_Tick;
             this.KeyDown += Form1_KeyDown;
             this.KeyUp += Form1_KeyUp;
             
@@ -47,6 +51,7 @@ namespace Metal_Slug
         {
             IsRight = false;
             IsLeft = false;
+            
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -55,6 +60,7 @@ namespace Metal_Slug
             {
                 IsRight = true;
                 IsLeft = false;
+                LastDirectionIsRight = true;
 
                 int heroX = LHeroR[flag].rcDst.X;
                 int heroWidth = LHeroR[flag].rcDst.Width;
@@ -72,6 +78,14 @@ namespace Metal_Slug
                 {
                     foreach (var hero in LHeroR)
                         hero.rcDst.X += 12;
+                    foreach (var hero in LHeroL)
+                        hero.rcDst.X += 12;
+                    foreach (var hero in LHeroIL)
+                        hero.rcDst.X += 12;
+                    foreach (var hero in LHeroIR)
+                        hero.rcDst.X += 12;
+
+
                 }
                 else if (Lwrld[0].rcSrc.X < maxMapScroll)
                 {
@@ -81,6 +95,12 @@ namespace Metal_Slug
                 {
                     // If map can't scroll, move hero to the right, but not past the map's edge
                     foreach (var hero in LHeroR)
+                        hero.rcDst.X += 12;
+                    foreach (var hero in LHeroL)
+                        hero.rcDst.X += 12;
+                    foreach (var hero in LHeroIL)
+                        hero.rcDst.X += 12;
+                    foreach (var hero in LHeroIR)
                         hero.rcDst.X += 12;
                 }
 
@@ -92,34 +112,62 @@ namespace Metal_Slug
             {
                 IsRight = false;
                 IsLeft = true;
+                LastDirectionIsRight = false;
 
-                int heroX = LHeroR[flag].rcDst.X;
+                int heroX = LHeroL[flag1].rcDst.X;
+                int heroWidth = LHeroL[flag1].rcDst.Width;
+                int screenScrollLimit = this.ClientSize.Width / 2;
                 int minMapScroll = 0;
-                int screenScrollLimit = this.ClientSize.Width / 2 -100 ;
+
+                // Calculate the hero's left edge in world coordinates
+                int heroLeftOnMap = Lwrld[0].rcSrc.X + heroX;
 
                 // Prevent moving past the map's left edge
-                if (Lwrld[0].rcSrc.X == 0 && heroX <= 0)
+                if (heroLeftOnMap <= 0)
                     return;
 
-                if (Lwrld[0].rcSrc.X > minMapScroll && heroX > screenScrollLimit)
+                if (heroX > screenScrollLimit)
+                {
+                    foreach (var hero in LHeroL)
+                        hero.rcDst.X -= 12;
+                    foreach (var hero in LHeroR)
+                        hero.rcDst.X -= 12;
+                    foreach (var hero in LHeroIL)
+                        hero.rcDst.X -= 12;
+                    foreach (var hero in LHeroIR)
+                        hero.rcDst.X -= 12;
+                }
+                else if (Lwrld[0].rcSrc.X > minMapScroll)
                 {
                     Lwrld[0].rcSrc.X -= 12;
                 }
-                else if (heroX > 0)
+                else
                 {
+                    foreach (var hero in LHeroL)
+                        hero.rcDst.X -= 12;
                     foreach (var hero in LHeroR)
+                        hero.rcDst.X -= 12;
+                    foreach (var hero in LHeroIL)
+                        hero.rcDst.X -= 12;
+                    foreach (var hero in LHeroIR)
                         hero.rcDst.X -= 12;
                 }
 
-                flag--;
-                if (flag < 0)
-                    flag = LHeroR.Count - 1;
+                flag1++;
+                if (flag1 == LHeroL.Count)
+                    flag1 = 0;
             }
             drawdubb(this.CreateGraphics());
         }
 
         private void Tt_Tick(object sender, EventArgs e)
         {
+            if(!IsLeft||!IsRight)
+            {
+                idleframe++;
+                if (idleframe == LHeroIL.Count)
+                    idleframe = 0;
+            }
             
             drawdubb(this.CreateGraphics());
         }
@@ -130,7 +178,11 @@ namespace Metal_Slug
             this.Location = new Point(0, this.ClientSize.Height / 2);
             off = new Bitmap(this.ClientSize.Width, this.ClientSize.Height);
             createworld();
-            createHero();
+            createHeroRight();
+            createHeroLeft();
+            createHeroIdleLeft();
+            createHeroIdleRight();
+
         }
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
@@ -144,7 +196,7 @@ namespace Metal_Slug
             pnn.rcDst = new Rectangle(0, 0, this.ClientSize.Width, 400);
             Lwrld.Add(pnn);
         }
-        private void createHero()
+        private void createHeroRight()
         {
             //first half of right
             CMultiImageActor pnn = new CMultiImageActor();
@@ -211,8 +263,137 @@ namespace Metal_Slug
             LHeroR.Add(pnn);
 
 
-
+        }
+        private void createHeroLeft()
+        {
             //start of left half
+            CMultiImageActor pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(10, 110, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(75, 110, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(135, 110, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(195, 110, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(260, 110, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(325, 110, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroL.Add(pnn);
+
+            //second half left
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(10, 160, 65, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(75, 160, 65, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(135, 160, 65, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(195, 160, 65, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(260, 160, 65, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(325, 160, 65, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroL.Add(pnn);
+
+        }
+        private void createHeroIdleLeft()
+        {
+            CMultiImageActor pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(10, 30, 60, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroIL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(75, 30, 60, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroIL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(135, 30, 60, 50);
+            pnn.rcDst = new Rectangle(100, 248, 150, 120);
+            LHeroIL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(195, 30, 60, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroIL.Add(pnn);
+        }
+        private void createHeroIdleRight()
+        {
+            //first half of right Idle
+            CMultiImageActor pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 70, 30, 60, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroIR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 130, 30, 60, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroIR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 190, 30, 60, 50);
+            pnn.rcDst = new Rectangle(100, 248, 150, 120);
+            LHeroIR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 258, 30, 60, 50);
+            pnn.rcDst = new Rectangle(100, 248, 150, 120);
+            LHeroIR.Add(pnn);
         }
 
         private void drawscene(Graphics g2)
@@ -225,22 +406,20 @@ namespace Metal_Slug
                 g2.DrawImage(ptrav.wrld, ptrav.rcDst, ptrav.rcSrc, GraphicsUnit.Pixel);
             }
 
-
-            if(IsRight)
+            if (IsRight)
                 g2.DrawImage(LHeroR[flag].wrld, LHeroR[flag].rcDst, LHeroR[flag].rcSrc, GraphicsUnit.Pixel);
-            if(IsLeft)
-                g2.DrawImage(LHeroL[flag].wrld, LHeroL[flag].rcDst, LHeroL[flag].rcSrc, GraphicsUnit.Pixel);
-
-
-
-            //for(int i=0;i< Lhero.Count;i++)
-            //{
-            //    CMultiImageActor ptrav = Lhero[i];
-            //    g2.DrawImage(ptrav.imgs[idleframe], ptrav.x, ptrav.y);
-
-
-            //}
+            else if (IsLeft)
+                g2.DrawImage(LHeroL[flag1].wrld, LHeroL[flag1].rcDst, LHeroL[flag1].rcSrc, GraphicsUnit.Pixel);
+            else
+            {
+                if(LastDirectionIsRight)
+                    g2.DrawImage(LHeroIR[idleframe].wrld, LHeroIR[idleframe].rcDst, LHeroIR[idleframe].rcSrc, GraphicsUnit.Pixel);
+                else
+                    g2.DrawImage(LHeroIL[idleframe].wrld, LHeroIL[idleframe].rcDst, LHeroIL[idleframe].rcSrc, GraphicsUnit.Pixel);
+            }
+                
         }
+
         private void drawdubb(Graphics g)
         {
             Graphics g2 = Graphics.FromImage(off);
