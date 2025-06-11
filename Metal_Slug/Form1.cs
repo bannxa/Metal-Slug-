@@ -20,6 +20,8 @@ namespace Metal_Slug
         List<CMultiImageActor> LHeroL = new List<CMultiImageActor>();
         List<CMultiImageActor> LHeroIL = new List<CMultiImageActor>();
         List<CMultiImageActor> LHeroIR = new List<CMultiImageActor>();
+        List<CMultiImageActor> LEnemyR = new List<CMultiImageActor>();
+
         Timer tt = new Timer();
         public int idleframe = 1;
         public int mapstart = 5;
@@ -29,6 +31,16 @@ namespace Metal_Slug
         public bool IsRight = false;
         public bool IsLeft = false;
         public bool LastDirectionIsRight = true;
+        public bool fjup = false;
+        public bool fjdown = false;
+        public int flag2 = 0; // for right movement enemy
+        float jumpVelocity = 0;
+        float gravity = 2.5f;
+        float jumpStartVelocity = -18f; // Negative for going up
+        bool isJumping = false;
+        bool isFalling = false;
+        int groundY = 245; // Change if your ground Y is different
+
 
 
 
@@ -42,20 +54,32 @@ namespace Metal_Slug
             tt.Tick += Tt_Tick;
             this.KeyDown += Form1_KeyDown;
             this.KeyUp += Form1_KeyUp;
-            
-            
-            
+
+
+
         }
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
             IsRight = false;
             IsLeft = false;
-            
+
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
+
+
+            if (e.KeyCode == Keys.Up)
+            {
+                if (!isJumping && !isFalling)
+                {
+                    isJumping = true;
+                    jumpVelocity = jumpStartVelocity;
+                }
+            }
+
+
             if (e.KeyCode == Keys.Right)
             {
                 IsRight = true;
@@ -162,13 +186,72 @@ namespace Metal_Slug
 
         private void Tt_Tick(object sender, EventArgs e)
         {
-            if(!IsLeft||!IsRight)
+            if (!IsLeft || !IsRight)
             {
                 idleframe++;
                 if (idleframe == LHeroIL.Count)
                     idleframe = 0;
             }
-            
+
+            int enemyX = LHeroR[flag].rcDst.X;
+            int screenScrollLimit = this.ClientSize.Width;
+            if (enemyX < screenScrollLimit)
+            {
+                foreach (var enemy in LEnemyR)
+                    enemy.rcDst.X += 20;
+
+            }
+            flag2++;
+            if (flag2 == LEnemyR.Count)
+                flag2 = 0;
+
+
+
+
+
+
+
+
+            CMultiImageActor hero = null;
+            if (IsRight)
+                hero = LHeroR[flag];
+            else if (IsLeft)
+                hero = LHeroL[flag1];
+            else if (LastDirectionIsRight)
+                hero = LHeroIR[idleframe];
+            else
+                hero = LHeroIL[idleframe];
+
+            // Smooth jump and fall
+            if (isJumping)
+            {
+                hero.rcDst.Y += (int)jumpVelocity;
+                jumpVelocity += gravity;
+                if (jumpVelocity > 0)
+                {
+                    isJumping = false;
+                    isFalling = true;
+                }
+            }
+            else if (isFalling)
+            {
+                hero.rcDst.Y += (int)jumpVelocity;
+                jumpVelocity += gravity;
+                if (hero.rcDst.Y >= groundY)
+                {
+                    hero.rcDst.Y = groundY;
+                    isFalling = false;
+                    jumpVelocity = 0;
+                }
+            }
+
+
+
+
+
+
+
+
             drawdubb(this.CreateGraphics());
         }
 
@@ -182,6 +265,8 @@ namespace Metal_Slug
             createHeroLeft();
             createHeroIdleLeft();
             createHeroIdleRight();
+            creatEnemyRight();
+
 
         }
         private void Form1_Paint(object sender, PaintEventArgs e)
@@ -192,22 +277,110 @@ namespace Metal_Slug
         {
             CAdvImgActor pnn = new CAdvImgActor();
             pnn.wrld = new Bitmap("Assets/maps/Level1.png");
-            pnn.rcSrc = new Rectangle(mapstart, 0,mapend, 220);
+            pnn.rcSrc = new Rectangle(mapstart, 0, mapend, 220);
             pnn.rcDst = new Rectangle(0, 0, this.ClientSize.Width, 400);
             Lwrld.Add(pnn);
         }
+        void creatEnemyRight()
+        {
+            //1
+            CMultiImageActor pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/2.png");
+            pnn.rcSrc = new Rectangle(0, 0, 150, 120);
+            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            LEnemyR.Add(pnn);
+            //2
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/2.png");
+            pnn.rcSrc = new Rectangle(120, 0, 150, 120);
+            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            LEnemyR.Add(pnn);
+            //3
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/2.png");
+            pnn.rcSrc = new Rectangle(250, 0, 150, 120);
+            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            LEnemyR.Add(pnn);
+            //4
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/2.png");
+            pnn.rcSrc = new Rectangle(380, 0, 150, 120);
+            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            LEnemyR.Add(pnn);
+            //5
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/2.png");
+            pnn.rcSrc = new Rectangle(510, 0, 150, 120);
+            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            LEnemyR.Add(pnn);
+
+
+            //6
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/2.png");
+            pnn.rcSrc = new Rectangle(650, 0, 150, 120);
+            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            LEnemyR.Add(pnn);
+
+
+            //7
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/2.png");
+            pnn.rcSrc = new Rectangle(780, 0, 150, 120);
+            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            LEnemyR.Add(pnn);
+
+            //8
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/2.png");
+            pnn.rcSrc = new Rectangle(910, 0, 150, 120);
+            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            LEnemyR.Add(pnn);
+
+
+            //9
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/2.png");
+            pnn.rcSrc = new Rectangle(510, 120, 150, 120);
+            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            LEnemyR.Add(pnn);
+
+
+            //10
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/2.png");
+            pnn.rcSrc = new Rectangle(650, 120, 150, 120);
+            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            LEnemyR.Add(pnn);
+
+            //11
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/2.png");
+            pnn.rcSrc = new Rectangle(780, 120, 150, 120);
+            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            LEnemyR.Add(pnn);
+
+
+            //12
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/2.png");
+            pnn.rcSrc = new Rectangle(910, 120, 150, 120);
+            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            LEnemyR.Add(pnn);
+        }
+
         private void createHeroRight()
         {
             //first half of right
             CMultiImageActor pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
-            pnn.rcSrc = new Rectangle(pnn.wrld.Width-80, 110, 65, 50);
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 80, 110, 65, 50);
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroR.Add(pnn);
 
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
-            pnn.rcSrc = new Rectangle(pnn.wrld.Width-140, 110, 65, 50);
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 140, 110, 65, 50);
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroR.Add(pnn);
 
@@ -412,12 +585,16 @@ namespace Metal_Slug
                 g2.DrawImage(LHeroL[flag1].wrld, LHeroL[flag1].rcDst, LHeroL[flag1].rcSrc, GraphicsUnit.Pixel);
             else
             {
-                if(LastDirectionIsRight)
+                if (LastDirectionIsRight)
                     g2.DrawImage(LHeroIR[idleframe].wrld, LHeroIR[idleframe].rcDst, LHeroIR[idleframe].rcSrc, GraphicsUnit.Pixel);
                 else
                     g2.DrawImage(LHeroIL[idleframe].wrld, LHeroIL[idleframe].rcDst, LHeroIL[idleframe].rcSrc, GraphicsUnit.Pixel);
             }
-                
+
+            g2.DrawImage(LEnemyR[flag2].wrld, LEnemyR[flag2].rcDst, LEnemyR[flag2].rcSrc, GraphicsUnit.Pixel);
+
+
+
         }
 
         private void drawdubb(Graphics g)
@@ -431,7 +608,7 @@ namespace Metal_Slug
     {
         public Bitmap wrld;
         public Rectangle rcDst, rcSrc;
-        
+
     }
     public class CMultiImageActor
     {
