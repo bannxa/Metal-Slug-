@@ -69,17 +69,6 @@ namespace Metal_Slug
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
 
-
-            if (e.KeyCode == Keys.Up)
-            {
-                if (!isJumping && !isFalling)
-                {
-                    isJumping = true;
-                    jumpVelocity = jumpStartVelocity;
-                }
-            }
-
-
             if (e.KeyCode == Keys.Right)
             {
                 IsRight = true;
@@ -193,63 +182,17 @@ namespace Metal_Slug
                     idleframe = 0;
             }
 
-            int enemyX = LHeroR[flag].rcDst.X;
-            int screenScrollLimit = this.ClientSize.Width;
+            int enemyX = 0;
+            int screenScrollLimit = Lwrld[0].rcSrc.Width;
             if (enemyX < screenScrollLimit)
             {
                 foreach (var enemy in LEnemyR)
-                    enemy.rcDst.X += 20;
+                    enemy.rcDst.X +=20;
 
             }
             flag2++;
             if (flag2 == LEnemyR.Count)
                 flag2 = 0;
-
-
-
-
-
-
-
-
-            CMultiImageActor hero = null;
-            if (IsRight)
-                hero = LHeroR[flag];
-            else if (IsLeft)
-                hero = LHeroL[flag1];
-            else if (LastDirectionIsRight)
-                hero = LHeroIR[idleframe];
-            else
-                hero = LHeroIL[idleframe];
-
-            // Smooth jump and fall
-            if (isJumping)
-            {
-                hero.rcDst.Y += (int)jumpVelocity;
-                jumpVelocity += gravity;
-                if (jumpVelocity > 0)
-                {
-                    isJumping = false;
-                    isFalling = true;
-                }
-            }
-            else if (isFalling)
-            {
-                hero.rcDst.Y += (int)jumpVelocity;
-                jumpVelocity += gravity;
-                if (hero.rcDst.Y >= groundY)
-                {
-                    hero.rcDst.Y = groundY;
-                    isFalling = false;
-                    jumpVelocity = 0;
-                }
-            }
-
-
-
-
-
-
 
 
             drawdubb(this.CreateGraphics());
@@ -616,6 +559,7 @@ namespace Metal_Slug
         public Bitmap wrld;
         public Rectangle rcDst, rcSrc;
         public int iframe;
+        public int worldx;
 
     }
 }
