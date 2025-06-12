@@ -1,13 +1,13 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\omarb\\Metal-Slug-\\Metal_Slug\\",
+  "WorkspaceRootPath": "C:\\Users\\user\\Metal-Slug-\\Metal_Slug\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{634C554F-C023-4466-88E3-9AB2DB333D6C}|Metal_Slug.csproj|c:\\users\\omarb\\metal-slug-\\metal_slug\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{634C554F-C023-4466-88E3-9AB2DB333D6C}|Metal_Slug.csproj|c:\\users\\user\\metal-slug-\\metal_slug\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{634C554F-C023-4466-88E3-9AB2DB333D6C}|Metal_Slug.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{634C554F-C023-4466-88E3-9AB2DB333D6C}|Metal_Slug.csproj|C:\\Users\\omarb\\Metal-Slug-\\Metal_Slug\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{634C554F-C023-4466-88E3-9AB2DB333D6C}|Metal_Slug.csproj|C:\\Users\\user\\Metal-Slug-\\Metal_Slug\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{634C554F-C023-4466-88E3-9AB2DB333D6C}|Metal_Slug.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
@@ -18,8 +18,16 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 4,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
@@ -32,11 +40,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Form1.cs",
-              "DocumentMoniker": "C:\\Users\\omarb\\Metal-Slug-\\Metal_Slug\\Form1.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Metal-Slug-\\Metal_Slug\\Form1.cs",
               "RelativeDocumentMoniker": "Form1.cs",
-              "ToolTip": "C:\\Users\\omarb\\Metal-Slug-\\Metal_Slug\\Form1.cs",
+              "ToolTip": "C:\\Users\\user\\Metal-Slug-\\Metal_Slug\\Form1.cs",
               "RelativeToolTip": "Form1.cs",
-              "ViewState": "AgIAAO0CAAAAAAAAAAAAwB0DAAABAAAAAAAAAA==",
+              "ViewState": "AQIAACkDAAAAAAAAAAAUwDYDAAAmAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-23T19:28:57.409Z",
               "EditorCaption": ""
@@ -45,10 +53,10 @@
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "Form1.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\omarb\\Metal-Slug-\\Metal_Slug\\Form1.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Metal-Slug-\\Metal_Slug\\Form1.cs",
               "RelativeDocumentMoniker": "Form1.cs",
               "ToolTip": "C:\\Users\\omarb\\Metal-Slug-\\Metal_Slug\\Form1.cs [Design]",
-              "RelativeToolTip": "Form1.cs [Design]",
+              "RelativeToolTip": "..\\..\\..\\omarb\\Metal-Slug-\\Metal_Slug\\Form1.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-23T19:28:49.16Z"
             }

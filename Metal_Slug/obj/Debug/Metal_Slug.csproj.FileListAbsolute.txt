@@ -20,3 +20,13 @@ C:\Users\omarb\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.csproj.GenerateResour
 C:\Users\omarb\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.csproj.CoreCompileInputs.cache
 C:\Users\omarb\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.exe
 C:\Users\omarb\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.pdb
+C:\Users\user\Metal-Slug-\Metal_Slug\bin\Debug\Metal_Slug.exe.config
+C:\Users\user\Metal-Slug-\Metal_Slug\bin\Debug\Metal_Slug.exe
+C:\Users\user\Metal-Slug-\Metal_Slug\bin\Debug\Metal_Slug.pdb
+C:\Users\user\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.csproj.AssemblyReference.cache
+C:\Users\user\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.Form1.resources
+C:\Users\user\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.Properties.Resources.resources
+C:\Users\user\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.csproj.GenerateResource.cache
+C:\Users\user\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.csproj.CoreCompileInputs.cache
+C:\Users\user\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.exe
+C:\Users\user\Metal-Slug-\Metal_Slug\obj\Debug\Metal_Slug.pdb

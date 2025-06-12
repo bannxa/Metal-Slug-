@@ -46,6 +46,8 @@ namespace Metal_Slug
         public int cttimer = 0;
         public bool isJumpingRight = false;
         public int jumpFrameRight = 0;
+        public int deathenenmy1 = 1500;
+
 
         public Form1()
         {
@@ -102,6 +104,10 @@ namespace Metal_Slug
                 else if (Lwrld[0].rcSrc.X < maxMapScroll)
                 {
                     Lwrld[0].rcSrc.X += 12;
+                    foreach (var enemy in LEnemyR)
+                        enemy.rcDst.X -= 16;
+
+                    deathenenmy1 -= 16;
                 }
                 else
                 {
@@ -159,6 +165,12 @@ namespace Metal_Slug
                 else if (Lwrld[0].rcSrc.X > minMapScroll)
                 {
                     Lwrld[0].rcSrc.X -= 12;
+
+                    foreach (var enemy in LEnemyR)
+                        enemy.rcDst.X += 16;
+
+                    deathenenmy1 += 16;
+
                 }
                 else
                 {
@@ -225,13 +237,35 @@ namespace Metal_Slug
             if (enemyX < screenScrollLimit)
             {
                 foreach (var enemy in LEnemyR)
-                    enemy.rcDst.X += 20;
+                    enemy.rcDst.X += 7;
             }
             flag2++;
             if (flag2 == LEnemyR.Count)
                 flag2 = 0;
 
-           
+
+
+            foreach (var enemy in LEnemyR)
+            {
+                if(deathenenmy1<= enemy.rcDst.X+ enemy.rcDst.Width)
+                {
+                    enemy.f = 1;
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             if (isJumpingLeft)
             {
                 
@@ -773,7 +807,7 @@ namespace Metal_Slug
                 else
                     g2.DrawImage(LHeroIL[idleframe].wrld, LHeroIL[idleframe].rcDst, LHeroIL[idleframe].rcSrc, GraphicsUnit.Pixel);
             }
-
+            if(LEnemyR[flag2].f==0)
             g2.DrawImage(LEnemyR[flag2].wrld, LEnemyR[flag2].rcDst, LEnemyR[flag2].rcSrc, GraphicsUnit.Pixel);
         }
         private void drawdubb(Graphics g)
@@ -794,5 +828,7 @@ namespace Metal_Slug
         public Rectangle rcDst, rcSrc;
         public int iframe;
         public int worldx;
+        public int f=0;       //if the enemy die or not
+
     }
 }
