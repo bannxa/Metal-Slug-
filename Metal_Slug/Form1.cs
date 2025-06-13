@@ -25,7 +25,9 @@ namespace Metal_Slug
         List<CMultiImageActor> LEnemyR = new List<CMultiImageActor>(); // enemy right
         List<CMultiImageActor> LEnemyL = new List<CMultiImageActor>(); // enemy left
         List<CMultiImageActor> Llazer = new List<CMultiImageActor>(); // first lazer
-        List<CMultiImageActor> Llazerfire = new List<CMultiImageActor>(); // first lazerfire
+        List<CMultiImageActor> LHeroSL = new List<CMultiImageActor>(); // hero shoot left
+        List<CImageActor> LBulletL = new List<CImageActor>(); // Left Bullet  
+        List<Cactor> lazer = new List<Cactor>(); // actors for lazer fire
 
 
 
@@ -51,8 +53,15 @@ namespace Metal_Slug
         public bool isJumpingRight = false;
         public int jumpFrameRight = 0;
         public int deathenenmy1 = 1500;
-        public int lazer1 = 0,go=0;
-        public int slowdownspedd=0;   // global count in tick to slow down the speed 
+        public int slowdownspedd = 0;   // global count in tick to slow down the speed 
+        public int Heightlaser;
+        public int laserflag = 0;
+        public int isShooting = -1;  // -1 means not shooting, 0 means shooting left, 1 means shooting right
+        public int shootFrame = 0;
+        public bool startshooting = false;
+        public int startstairs = 0;
+
+
 
 
 
@@ -66,23 +75,27 @@ namespace Metal_Slug
             tt.Tick += Tt_Tick;
             this.KeyDown += Form1_KeyDown;
             this.KeyUp += Form1_KeyUp;
+
         }
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
             IsRight = false;
             IsLeft = false;
+            isShooting = -1;
+            shootFrame = 0;
+            startshooting = false; // Reset shooting state
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
 
 
-            
+
 
             if (e.KeyCode == Keys.D)
             {
-                if (isJumpingLeft) return; // Don't allow move while jumping left
+                if (isJumpingLeft || isShooting == 0) return; // Don't allow move while jumping left
 
                 IsRight = true;
                 IsLeft = false;
@@ -95,8 +108,12 @@ namespace Metal_Slug
 
                 int heroRightOnMap = Lwrld[0].rcSrc.X + heroX + heroWidth;
 
-                if (heroRightOnMap >= Lwrld[0].wrld.Width-300)     // lader on Lwrld[0].wrld.Width-400    important
-                    return;
+                if (heroRightOnMap >= Lwrld[0].wrld.Width - 400)
+                {
+                    
+                }
+                // lader on Lwrld[0].wrld.Width-400    important
+                
 
                 if (heroX < screenScrollLimit)
                 {
@@ -112,6 +129,9 @@ namespace Metal_Slug
                         hero.rcDst.X += 12;
                     foreach (var hero in LHeroJR)
                         hero.rcDst.X += 12;
+                    foreach (var hero in LHeroSL)
+                        hero.rcDst.X += 12;
+                   
                 }
                 else if (Lwrld[0].rcSrc.X < maxMapScroll)
                 {
@@ -124,8 +144,13 @@ namespace Metal_Slug
                     foreach (var lazer in Llazer)
                         lazer.rcDst.X -= 16;
 
-                    foreach (var lazer in Llazerfire)
-                        lazer.rcDst.X -= 16;
+                    foreach (var bullet in LBulletL)
+                        bullet.x -= 12;
+
+                    //foreach (var lazer in Llazerfire)
+                    //    lazer.rcDst.X -= 16;
+
+                    lazer[0].x -= 16; // Adjust the position of the lazer actor
                 }
                 else
                 {
@@ -149,7 +174,7 @@ namespace Metal_Slug
             }
             if (e.KeyCode == Keys.A)
             {
-                if (isJumpingLeft) return; // Don't allow move while jumping left
+                if (isJumpingLeft || isShooting == 0) return; // Don't allow move while jumping left
 
                 IsRight = false;
                 IsLeft = true;
@@ -179,6 +204,8 @@ namespace Metal_Slug
                         hero.rcDst.X -= 12;
                     foreach (var hero in LHeroJR)
                         hero.rcDst.X -= 12;
+                    foreach (var hero in LHeroSL)
+                        hero.rcDst.X -= 12;
                 }
                 else if (Lwrld[0].rcSrc.X > minMapScroll)
                 {
@@ -192,8 +219,7 @@ namespace Metal_Slug
                     foreach (var lazer in Llazer)
                         lazer.rcDst.X += 16;
 
-                    foreach (var lazer in Llazerfire)
-                        lazer.rcDst.X += 16;
+                    lazer[0].x += 16;
                 }
                 else
                 {
@@ -218,7 +244,7 @@ namespace Metal_Slug
             }
             if (e.KeyCode == Keys.Q)
             {
-                if (!isJumpingLeft && !isJumping && !isFalling)
+                if (!isJumpingLeft && !isJumping && !isFalling || isShooting == 0)
                 {
                     isJumpingLeft = true;
                     jumpFrameLeft = 0;
@@ -230,7 +256,7 @@ namespace Metal_Slug
             }
             if (e.KeyCode == Keys.E)
             {
-                if (!isJumpingRight && !isJumping && !isFalling)
+                if (!isJumpingRight && !isJumping && !isFalling || isShooting == 0)
                 {
                     isJumpingRight = true;
                     jumpFrameRight = 0;
@@ -240,10 +266,16 @@ namespace Metal_Slug
                     LastDirectionIsRight = true;
                 }
             }
+            if (e.KeyCode == Keys.Left)
+            {
+                isShooting = 0; // Shooting left
+                IsLeft = true;
+                IsRight = false;
+            }
 
 
 
-           
+
 
             drawdubb(this.CreateGraphics());
         }
@@ -251,13 +283,51 @@ namespace Metal_Slug
         private void Tt_Tick(object sender, EventArgs e)
         {
             cttimer++;
-            if (!IsLeft && !IsRight && !isJumpingLeft && cttimer == 5)
+            //shooting logic 
+            if (isShooting == 0 && cttimer % 2 == 0)
+            {
+                if (shootFrame < LHeroSL.Count - 1)
+                {
+                    shootFrame++;
+                }
+                if (shootFrame == LHeroSL.Count - 1)
+                {
+                    startshooting = true;
+                    if(LBulletL.Count > 0) // Limit the number of bullets
+                    {
+                        if (LBulletL[LBulletL.Count - 1].x <= LHeroSL[shootFrame].rcDst.X - 100 ) 
+                        {
+                            createLeftBullet(); // Create a new bullet
+                        }
+                    }
+                    else if (LBulletL.Count == 0)
+                    {
+                        createLeftBullet(); // Create the first bullet
+                    }
+                    
+                    
+                }
+
+            }
+            for(int i = 0; i < LBulletL.Count; i++)
+            {
+                if (LBulletL[i].x <= 0)
+                {
+                    LBulletL.RemoveAt(i);
+                    i--;
+                }
+                else
+                {
+                    LBulletL[i].x -= 10;
+                }
+            }
+            if (!IsLeft && !IsRight && !isJumpingLeft && cttimer % 5 == 0)
             {
                 idleframe++;
                 if (idleframe == LHeroIL.Count)
                     idleframe = 0;
-                cttimer = 0;
-            }
+
+            } //idle anim
 
 
             int enemyX = 0;
@@ -270,30 +340,6 @@ namespace Metal_Slug
             flag2++;
             if (flag2 == LEnemyR.Count)
                 flag2 = 0;
-            if(slowdownspedd % 5==0)
-            {
-                if (lazer1 < 15 && go == 0)
-                {
-                    lazer1++;
-                }
-                else
-                {
-                    go = 1;
-                    if (lazer1 > 0 && go == 1)
-                    {
-                        lazer1--;
-
-                    }
-                    else
-                    {
-                        go = 0;
-
-                    }
-
-
-                }
-            }
-            
 
             foreach (var enemy in LEnemyR)
             {
@@ -302,19 +348,6 @@ namespace Metal_Slug
                     enemy.f = 1;
                 }
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
             if (isJumpingLeft)
             {
@@ -346,6 +379,8 @@ namespace Metal_Slug
                     foreach (var hero in LHeroIR)
                         hero.rcDst.X = LHeroJL[0].rcDst.X;
                     foreach (var hero in LHeroJR)
+                        hero.rcDst.X = LHeroJL[0].rcDst.X;
+                    foreach (var hero in LHeroSL)
                         hero.rcDst.X = LHeroJL[0].rcDst.X;
 
 
@@ -386,6 +421,8 @@ namespace Metal_Slug
                         hero.rcDst.X = LHeroJR[0].rcDst.X;
                     foreach (var hero in LHeroJL)
                         hero.rcDst.X = LHeroJR[0].rcDst.X;
+                    foreach (var hero in LHeroSL)
+                        hero.rcDst.X = LHeroJR[0].rcDst.X;
 
                     isJumpingRight = false;
                     jumpFrameRight = 0;
@@ -394,6 +431,25 @@ namespace Metal_Slug
                 }
             }
             slowdownspedd++;
+
+            if (Heightlaser <= groundY && laserflag == 0)
+            {
+                Heightlaser += 10;
+                if (Heightlaser >= groundY)
+                {
+                    laserflag = 1;
+                }
+            }
+            else if (laserflag == 1)
+            {
+                Heightlaser -= 10;
+                if (Heightlaser <= 10)
+                {
+                    laserflag = 0;
+                }
+            }
+
+
             drawdubb(this.CreateGraphics());
         }
 
@@ -410,6 +466,8 @@ namespace Metal_Slug
             createHeroJumpLeft();
             createHeroJumpRight();
             createlazer();
+            createHeroShootingLeft();
+            
 
         }
         private void Form1_Paint(object sender, PaintEventArgs e)
@@ -417,8 +475,8 @@ namespace Metal_Slug
             drawdubb(e.Graphics);
         }
 
-        
-      
+
+
 
         private void createworld()
         {
@@ -513,158 +571,51 @@ namespace Metal_Slug
 
         void createlazer()
         {
-            //1
-            CMultiImageActor pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(0, 0, 60, 80);
-            pnn.rcDst = new Rectangle(430, 10, 60, 80);
-            Llazer.Add(pnn);
-
-            //2
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(60, 0, 60, 80);
-            pnn.rcDst = new Rectangle(430, 10, 60, 80);
-            Llazer.Add(pnn);
-
-            //3
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(120, 0, 60, 80);
-            pnn.rcDst = new Rectangle(430, 10, 60, 80);
-            Llazer.Add(pnn);
-            //4
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(180, 0, 50, 80);
-            pnn.rcDst = new Rectangle(430, 10, 50, 80);
-            Llazer.Add(pnn);
-
-            //5
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(230, 0, 50, 80);
-            pnn.rcDst = new Rectangle(430, 10, 50, 80);
-            Llazer.Add(pnn);
-
-            //6
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(280, 0, 50, 80);
-            pnn.rcDst = new Rectangle(430, 10, 50, 80);
-            Llazer.Add(pnn);
-
-            //7
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(330, 0, 30, 80);
-            pnn.rcDst = new Rectangle(430, 10, 30, 80);
-            Llazer.Add(pnn);
-
-
-            //8
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(360, 0, 40, 80);
-            pnn.rcDst = new Rectangle(430, 10, 40, 80);
-            Llazer.Add(pnn);
-
 
             //9
-            pnn = new CMultiImageActor();
+            CMultiImageActor pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/4.png");
             pnn.rcSrc = new Rectangle(400, 0, 30, 80);
-            pnn.rcDst = new Rectangle(430, 10, 30, 80);
+            pnn.rcDst = new Rectangle(460, 10, 30, 80);
             Llazer.Add(pnn);
 
+            Cactor pnn2 = new Cactor();
+            pnn2.x = 474;
+            pnn2.y = pnn.wrld.Height;
+            lazer.Add(pnn2);
 
-            //10
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(430, 0, 40, 80);
-            pnn.rcDst = new Rectangle(430, 10, 40, 80);
-            Llazer.Add(pnn);
-
-            //11
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(470, 0, 40, 80);
-            pnn.rcDst = new Rectangle(430, 10, 40, 80);
-            Llazer.Add(pnn);
-
-
-            //12
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(510, 0, 40, 80);
-            pnn.rcDst = new Rectangle(430, 10, 40, 80);
-            Llazer.Add(pnn);
-
-
-            //13
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(550, 0, 50, 80);
-            pnn.rcDst = new Rectangle(430, 10, 50, 80);
-            Llazer.Add(pnn);
-
-            //14
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(600, 0, 50, 80);
-            pnn.rcDst = new Rectangle(430, 10, 50, 80);
-            Llazer.Add(pnn);
-
-            //15
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(650, 0, 60, 80);
-            pnn.rcDst = new Rectangle(430, 10, 60, 80);
-            Llazer.Add(pnn);
-
-            //16
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(710, 0, 60, 80);
-            pnn.rcDst = new Rectangle(430, 10, 60, 80);
-            Llazer.Add(pnn);
-
-            //17
-            pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/4.png");
-            pnn.rcSrc = new Rectangle(770, 0, 60, 80);
-            pnn.rcDst = new Rectangle(430, 10, 60, 80);
-            Llazer.Add(pnn);
+            Heightlaser = 10;
 
 
 
-            //fire
-             pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/5.png");
-            pnn.rcSrc = new Rectangle(0, 0, 90, 200);
-            pnn.rcDst = new Rectangle(430, 10, 40, 80);
-            Llazerfire.Add(pnn);
+
+            ////fire
+            //pnn = new CMultiImageActor();
+            //pnn.wrld = new Bitmap("Assets/enemy/5.png");
+            //pnn.rcSrc = new Rectangle(0, 0, 90, 200);
+            //pnn.rcDst = new Rectangle(430, 10, 40, 80);
+            //Llazerfire.Add(pnn);
 
 
-             pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/5.png");
-            pnn.rcSrc = new Rectangle(90, 0, 80, 200);
-            pnn.rcDst = new Rectangle(430, 10, 40, 80);
-            Llazerfire.Add(pnn);
+            // pnn = new CMultiImageActor();
+            //pnn.wrld = new Bitmap("Assets/enemy/5.png");
+            //pnn.rcSrc = new Rectangle(90, 0, 80, 200);
+            //pnn.rcDst = new Rectangle(430, 10, 40, 80);
+            //Llazerfire.Add(pnn);
 
 
-             pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/5.png");
-            pnn.rcSrc = new Rectangle(160, 0, 70, 200);
-            pnn.rcDst = new Rectangle(430, 10, 40, 80);
-            Llazerfire.Add(pnn);
+            // pnn = new CMultiImageActor();
+            //pnn.wrld = new Bitmap("Assets/enemy/5.png");
+            //pnn.rcSrc = new Rectangle(160, 0, 70, 200);
+            //pnn.rcDst = new Rectangle(430, 10, 40, 80);
+            //Llazerfire.Add(pnn);
 
 
-             pnn = new CMultiImageActor();
-            pnn.wrld = new Bitmap("Assets/enemy/5.png");
-            pnn.rcSrc = new Rectangle(230, 0, 70, 240);
-            pnn.rcDst = new Rectangle(430, 10, 40, 80);
-            Llazerfire.Add(pnn);
+            // pnn = new CMultiImageActor();
+            //pnn.wrld = new Bitmap("Assets/enemy/5.png");
+            //pnn.rcSrc = new Rectangle(230, 0, 70, 240);
+            //pnn.rcDst = new Rectangle(430, 10, 40, 80);
+            //Llazerfire.Add(pnn);
 
         }
 
@@ -932,59 +883,195 @@ namespace Metal_Slug
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroJR.Add(pnn);
 
-             pnn = new CMultiImageActor();
+            pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
             pnn.rcSrc = new Rectangle(pnn.wrld.Width - 140, 405, 60, 50);
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroJR.Add(pnn);
 
-             pnn = new CMultiImageActor();
+            pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
             pnn.rcSrc = new Rectangle(pnn.wrld.Width - 205, 405, 60, 50);
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroJR.Add(pnn);
 
-             pnn = new CMultiImageActor();
+            pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
             pnn.rcSrc = new Rectangle(pnn.wrld.Width - 270, 405, 60, 50);
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroJR.Add(pnn);
 
-             pnn = new CMultiImageActor();
+            pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
             pnn.rcSrc = new Rectangle(pnn.wrld.Width - 340, 405, 60, 50);
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroJR.Add(pnn);
 
-             pnn = new CMultiImageActor();
+            pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
             pnn.rcSrc = new Rectangle(pnn.wrld.Width - 410, 405, 60, 50);
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroJR.Add(pnn);
 
-             pnn = new CMultiImageActor();
+            pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
             pnn.rcSrc = new Rectangle(pnn.wrld.Width - 478, 405, 60, 50);
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroJR.Add(pnn);
 
-             pnn = new CMultiImageActor();
+            pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
             pnn.rcSrc = new Rectangle(pnn.wrld.Width - 540, 405, 60, 50);
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroJR.Add(pnn);
 
-             pnn = new CMultiImageActor();
+            pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
             pnn.rcSrc = new Rectangle(pnn.wrld.Width - 600, 405, 60, 50);
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroJR.Add(pnn);
 
-             pnn = new CMultiImageActor();
+            pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
             pnn.rcSrc = new Rectangle(pnn.wrld.Width - 665, 405, 60, 50);
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroJR.Add(pnn);
+        }
+        private void createHeroShootingLeft()
+        {
+            //first half of left shooting
+
+            CMultiImageActor pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(10, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(80, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(145, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(215, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(280, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(340, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(405, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(465, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(535, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(605, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSL.Add(pnn);
+
+            //second half of left shooting
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(10, 710, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(80, 710, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(145, 710, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(215, 710, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(280, 710, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(350, 710, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(415, 710, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(475, 710, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(540, 710, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroSL.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/1.png");
+            pnn.rcSrc = new Rectangle(605, 710, 65, 50);
+            pnn.rcDst = new Rectangle(100, 245, 150, 120);
+            LHeroSL.Add(pnn);
+        }
+        private void createLeftBullet()
+        {
+            CImageActor pnn = new CImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/b.png");
+            pnn.wrld.MakeTransparent(Color.White);
+            pnn.x = LHeroSL[LHeroSL.Count-1].rcDst.X - 40;
+            pnn.y = LHeroSL[LHeroSL.Count - 1].rcDst.Y + 40;
+            LBulletL.Add(pnn);
+
         }
 
 
@@ -997,7 +1084,12 @@ namespace Metal_Slug
                 g2.DrawImage(ptrav.wrld, ptrav.rcDst, ptrav.rcSrc, GraphicsUnit.Pixel);
             }
 
-            if (isJumpingLeft)
+            // Only draw the hero if not shooting
+            if (isShooting == 0)
+            {
+                g2.DrawImage(LHeroSL[shootFrame].wrld, LHeroSL[shootFrame].rcDst, LHeroSL[shootFrame].rcSrc, GraphicsUnit.Pixel); // shooting left
+            }
+            else if (isJumpingLeft)
             {
                 g2.DrawImage(LHeroJL[jumpFrameLeft].wrld, LHeroJL[jumpFrameLeft].rcDst, LHeroJL[jumpFrameLeft].rcSrc, GraphicsUnit.Pixel);
             }
@@ -1020,26 +1112,25 @@ namespace Metal_Slug
                 else
                     g2.DrawImage(LHeroIL[idleframe].wrld, LHeroIL[idleframe].rcDst, LHeroIL[idleframe].rcSrc, GraphicsUnit.Pixel);
             }
-            if(LEnemyR[flag2].f==0)
-            g2.DrawImage(LEnemyR[flag2].wrld, LEnemyR[flag2].rcDst, LEnemyR[flag2].rcSrc, GraphicsUnit.Pixel);
 
+            if (LEnemyR[flag2].f == 0)
+                g2.DrawImage(LEnemyR[flag2].wrld, LEnemyR[flag2].rcDst, LEnemyR[flag2].rcSrc, GraphicsUnit.Pixel);
 
-            if(lazer1==8)
+            g2.DrawImage(Llazer[0].wrld, Llazer[0].rcDst, Llazer[0].rcSrc, GraphicsUnit.Pixel); //lazer
+            g2.FillRectangle(Brushes.DarkRed, lazer[0].x, lazer[0].y, 5, Heightlaser); //red laser
+            for (int i=0;i<LBulletL.Count;i++)
             {
-                for (int i = 0; i < Llazerfire.Count; i++)
-                {
-                    CMultiImageActor ptrav = Llazerfire[i];
-                    g2.DrawImage(ptrav.wrld, ptrav.rcDst, ptrav.rcSrc, GraphicsUnit.Pixel);
-                }
-            }
-            else
-            {
-                g2.DrawImage(Llazer[lazer1].wrld, Llazer[lazer1].rcDst, Llazer[lazer1].rcSrc, GraphicsUnit.Pixel);
+                CImageActor bullet = LBulletL[i];
+                g2.DrawImage(bullet.wrld, bullet.x, bullet.y, 70, 60); //draw bullet
 
             }
+            
+                
+            
 
 
         }
+
         private void drawdubb(Graphics g)
         {
             Graphics g2 = Graphics.FromImage(off);
@@ -1058,7 +1149,17 @@ namespace Metal_Slug
         public Rectangle rcDst, rcSrc;
         public int iframe;
         public int worldx;
-        public int f=0;       //if the enemy die or not
+        public int f = 0;       //if the enemy die or not
+
+    }
+    public class Cactor
+    {
+        public int x, y;
+    }
+    public class CImageActor
+    {
+        public Bitmap wrld;
+        public int x, y;
 
     }
 }
