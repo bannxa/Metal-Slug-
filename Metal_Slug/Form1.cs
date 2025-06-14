@@ -26,10 +26,15 @@ namespace Metal_Slug
         List<CMultiImageActor> LEnemyL = new List<CMultiImageActor>(); // enemy left
         List<CMultiImageActor> Llazer = new List<CMultiImageActor>(); // first lazer
         List<CMultiImageActor> LHeroSL = new List<CMultiImageActor>(); // hero shoot left
+        List<CMultiImageActor> LHeroSR = new List<CMultiImageActor>(); // hero shoot left
         List<CImageActor> LBulletL = new List<CImageActor>(); // Left Bullet  
+        List<CImageActor> LBulletR = new List<CImageActor>(); // Right Bullet  
+        List<CImageActor> LPlatform = new List<CImageActor>();   
+        List<CImageActor> LLadder = new List<CImageActor>();   
         List<Cactor> lazer = new List<Cactor>(); // actors for lazer fire
         List<CMultiImageActor> Lboom = new List<CMultiImageActor>();
         List<CMultiImageActor> Lenemy2 = new List<CMultiImageActor>();
+        List<CMultiImageActor> Lenemy3 = new List<CMultiImageActor>();
 
 
 
@@ -64,7 +69,15 @@ namespace Metal_Slug
         public bool startshooting = false;
         public int startstairs = 0;
         public int fenemy2 = 0;
-
+        public bool flagelevator = false;
+        public bool key = false; // for elevator
+        public int flagplatform = 0; // for platform
+        public int platformStartX; // The starting X position of the platform
+        public int platformEndX;   // The ending X position of the platform
+        public int maxMapScroll;
+        public int IsOnladder =-1;
+        public bool isFallingFromLadder = false;
+        public int fenemy3 = 0; 
 
 
 
@@ -95,221 +108,345 @@ namespace Metal_Slug
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
 
-
-
-
-            if (e.KeyCode == Keys.D)
+            if(!isFalling)
             {
-                if (isJumpingLeft || isShooting == 0) return; // Don't allow move while jumping left
-
-                IsRight = true;
-                IsLeft = false;
-                LastDirectionIsRight = true;
-
-                int heroX = LHeroR[flag].rcDst.X;
-                int heroWidth = LHeroR[flag].rcDst.Width;
-                int screenScrollLimit = this.ClientSize.Width / 2;
-                int maxMapScroll = Lwrld[0].wrld.Width - Lwrld[0].rcSrc.Width;
-
-                int heroRightOnMap = Lwrld[0].rcSrc.X + heroX + heroWidth;
-
-                if (heroRightOnMap >= Lwrld[0].wrld.Width - 400)
+                if (!flagelevator)
                 {
-                    
-                }
-                // lader on Lwrld[0].wrld.Width-400    important
-                
-
-                if (heroX < screenScrollLimit)
-                {
-                    foreach (var hero in LHeroR)
-                        hero.rcDst.X += 12;
-                    foreach (var hero in LHeroL)
-                        hero.rcDst.X += 12;
-                    foreach (var hero in LHeroIL)
-                        hero.rcDst.X += 12;
-                    foreach (var hero in LHeroIR)
-                        hero.rcDst.X += 12;
-                    foreach (var hero in LHeroJL)
-                        hero.rcDst.X += 12;
-                    foreach (var hero in LHeroJR)
-                        hero.rcDst.X += 12;
-                    foreach (var hero in LHeroSL)
-                        hero.rcDst.X += 12;
-                   
-                }
-                else if (Lwrld[0].rcSrc.X < maxMapScroll)
-                {
-                    Lwrld[0].rcSrc.X += 12;
-                    foreach (var enemy in LEnemyR)
-                        enemy.rcDst.X -= 16;
-
-                    deathenenmy1 -= 16;
-
-                    foreach (var lazer in Llazer)
-                        lazer.rcDst.X -= 16;
-
-                    foreach (var bullet in LBulletL)
-                        bullet.x -= 12;
-
-                    if (LHeroL[flag1].rcDst.X > Llazer[0].rcDst.X)
+                    if (e.KeyCode == Keys.D)
                     {
-                        foreach (var enemy2 in Lenemy2)
-                            enemy2.rcDst.X -= 16;
+                        if (isJumpingLeft || isShooting == 0) return; // Don't allow move while jumping left
+
+                        IsRight = true;
+                        IsLeft = false;
+                        LastDirectionIsRight = true;
+
+                        int heroX = LHeroR[flag].rcDst.X;
+                        int heroWidth = LHeroR[flag].rcDst.Width;
+                        int screenScrollLimit = this.ClientSize.Width / 2;
+
+
+                        int heroRightOnMap = Lwrld[0].rcSrc.X + heroX + heroWidth;
+
+                        if (heroRightOnMap >= Lwrld[0].wrld.Width - 250)                // lader on Lwrld[0].wrld.Width-400    important
+                            return;
+
+
+
+
+
+                        if (heroX < screenScrollLimit)
+                        {
+                            foreach (var hero in LHeroR)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroL)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroIL)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroIR)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroJL)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroJR)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroSL)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroSR)
+                                hero.rcDst.X += 12;
+
+
+
+
+
+                        }
+                        else if (Lwrld[0].rcSrc.X < maxMapScroll)
+                        {
+                            Lwrld[0].rcSrc.X += 12;
+                            foreach (var enemy in LEnemyR)
+                                enemy.rcDst.X -= 16;
+
+                            deathenenmy1 -= 16;
+
+                            foreach (var lazer in Llazer)
+                                lazer.rcDst.X -= 16;
+
+                            foreach (var bullet in LBulletL)
+                                bullet.x -= 16;
+                            LPlatform[0].x -= 16;
+                            LLadder[0].x -= 16;
+                            foreach (var enemy3 in Lenemy3)
+                                enemy3.rcDst.X -= 16;
+
+
+
+                            if (LHeroL[flag1].rcDst.X > Llazer[0].rcDst.X)
+                            {
+                                foreach (var enemy2 in Lenemy2)
+                                    enemy2.rcDst.X -= 16;
+                            }
+
+                            //foreach (var lazer in Llazerfire)
+                            //    lazer.rcDst.X -= 16;
+
+                            lazer[0].x -= 16; // Adjust the position of the lazer actor
+
+                            foreach (var boom in Lboom)
+                            {
+                                boom.rcDst.X -= 16;
+
+                            }
+                        }
+                        else
+                        {
+                            foreach (var hero in LHeroR)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroL)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroIL)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroIR)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroJL)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroJR)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroSL)
+                                hero.rcDst.X += 12;
+                            foreach (var hero in LHeroSR)
+                                hero.rcDst.X += 12;
+
+                        }
+                        cttimer = 0;
+                        flag++;
+                        if (flag == LHeroR.Count)
+                            flag = 0;
                     }
-
-                    //foreach (var lazer in Llazerfire)
-                    //    lazer.rcDst.X -= 16;
-
-                    lazer[0].x -= 16; // Adjust the position of the lazer actor
-
-                    foreach (var boom in Lboom)
+                    if (e.KeyCode == Keys.A)
                     {
-                        boom.rcDst.X -= 16;
+                        if (isJumpingLeft || isShooting == 0) return; // Don't allow move while jumping left
 
+                        IsRight = false;
+                        IsLeft = true;
+                        LastDirectionIsRight = false;
+
+                        int heroX = LHeroL[flag1].rcDst.X;
+                        int heroWidth = LHeroL[flag1].rcDst.Width;
+                        int screenScrollLimit = this.ClientSize.Width / 2;
+                        int minMapScroll = 0;
+
+                        int heroLeftOnMap = Lwrld[0].rcSrc.X + heroX;
+
+                        if (heroLeftOnMap <= 0)
+                            return;
+
+                        if (heroX > screenScrollLimit)
+                        {
+                            foreach (var hero in LHeroL)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroR)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroIL)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroIR)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroJL)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroJR)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroSL)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroSR)
+                                hero.rcDst.X -= 12;
+
+                        }
+                        else if (Lwrld[0].rcSrc.X > minMapScroll)
+                        {
+                            Lwrld[0].rcSrc.X -= 12;
+
+                            foreach (var enemy in LEnemyR)
+                                enemy.rcDst.X += 16;
+
+                            deathenenmy1 += 16;
+
+                            foreach (var lazer in Llazer)
+                                lazer.rcDst.X += 16;
+                            LPlatform[0].x += 16;
+                            LLadder[0].x += 16;
+                            foreach (var enemy3 in Lenemy3)
+                            enemy3.rcDst.X += 16;
+
+                            lazer[0].x += 16;
+                            if (LHeroL[flag1].rcDst.X > Llazer[0].rcDst.X)
+                            {
+                                foreach (var enemy2 in Lenemy2)
+                                    enemy2.rcDst.X += 16;
+                            }
+
+                            foreach (var boom in Lboom)
+                            {
+                                boom.rcDst.X += 16;
+
+                            }
+                        }
+                        else
+                        {
+                            foreach (var hero in LHeroL)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroR)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroIL)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroIR)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroJL)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroJR)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroSL)
+                                hero.rcDst.X -= 12;
+                            foreach (var hero in LHeroSR)
+                                hero.rcDst.X -= 12;
+
+                        }
+
+                        flag1++;
+                        if (flag1 == LHeroL.Count)
+                            flag1 = 0;
+                        cttimer = 0;
                     }
-                }
-                else
-                {
-                    foreach (var hero in LHeroR)
-                        hero.rcDst.X += 12;
-                    foreach (var hero in LHeroL)
-                        hero.rcDst.X += 12;
-                    foreach (var hero in LHeroIL)
-                        hero.rcDst.X += 12;
-                    foreach (var hero in LHeroIR)
-                        hero.rcDst.X += 12;
-                    foreach (var hero in LHeroJL)
-                        hero.rcDst.X += 12;
-                    foreach (var hero in LHeroJR)
-                        hero.rcDst.X += 12;
-                }
-                cttimer = 0;
-                flag++;
-                if (flag == LHeroR.Count)
-                    flag = 0;
-            }
-            if (e.KeyCode == Keys.A)
-            {
-                if (isJumpingLeft || isShooting == 0) return; // Don't allow move while jumping left
-
-                IsRight = false;
-                IsLeft = true;
-                LastDirectionIsRight = false;
-
-                int heroX = LHeroL[flag1].rcDst.X;
-                int heroWidth = LHeroL[flag1].rcDst.Width;
-                int screenScrollLimit = this.ClientSize.Width / 2;
-                int minMapScroll = 0;
-
-                int heroLeftOnMap = Lwrld[0].rcSrc.X + heroX;
-
-                if (heroLeftOnMap <= 0)
-                    return;
-
-                if (heroX > screenScrollLimit)
-                {
-                    foreach (var hero in LHeroL)
-                        hero.rcDst.X -= 12;
-                    foreach (var hero in LHeroR)
-                        hero.rcDst.X -= 12;
-                    foreach (var hero in LHeroIL)
-                        hero.rcDst.X -= 12;
-                    foreach (var hero in LHeroIR)
-                        hero.rcDst.X -= 12;
-                    foreach (var hero in LHeroJL)
-                        hero.rcDst.X -= 12;
-                    foreach (var hero in LHeroJR)
-                        hero.rcDst.X -= 12;
-                    foreach (var hero in LHeroSL)
-                        hero.rcDst.X -= 12;
-                }
-                else if (Lwrld[0].rcSrc.X > minMapScroll)
-                {
-                    Lwrld[0].rcSrc.X -= 12;
-
-                    foreach (var enemy in LEnemyR)
-                        enemy.rcDst.X += 16;
-
-                    deathenenmy1 += 16;
-
-                    foreach (var lazer in Llazer)
-                        lazer.rcDst.X += 16;
-
-                    lazer[0].x += 16;
-                    if (LHeroL[flag1].rcDst.X > Llazer[0].rcDst.X)
+                    if (e.KeyCode == Keys.Q)
                     {
-                        foreach (var enemy2 in Lenemy2)
-                            enemy2.rcDst.X += 16;
+                        if (!isJumpingLeft && !isJumping && !isFalling || isShooting == 0)
+                        {
+                            isJumpingLeft = true;
+                            jumpFrameLeft = 0;
+                            jumpVelocity = jumpStartVelocity;
+                            IsLeft = false;
+                            IsRight = false;
+                            LastDirectionIsRight = false;
+                        }
                     }
-
-                    foreach (var boom in Lboom)
+                    if (e.KeyCode == Keys.E)
                     {
-                        boom.rcDst.X += 16;
+                        if (!isJumpingRight && !isJumping && !isFalling || isShooting == 0)
+                        {
+                            isJumpingRight = true;
+                            jumpFrameRight = 0;
+                            jumpVelocity = jumpStartVelocity;
+                            IsLeft = false;
+                            IsRight = false;
+                            LastDirectionIsRight = true;
+                        }
+                    }
+                    if (e.KeyCode == Keys.Left)
+                    {
+                        isShooting = 0; // Shooting left
+                        IsLeft = true;
+                        IsRight = false;
+                    }
+                    if (e.KeyCode == Keys.Right)
+                    {
+                        isShooting = 1; // Shooting right
+                        IsLeft = false;
+                        IsRight = true;
+                    }
+                    if (e.KeyCode == Keys.W)
+                    {
+                        if (LHeroIL[idleframe].rcDst.X >= LLadder[0].x && LHeroIL[idleframe].rcDst.X <= LLadder[0].x + LLadder[0].wrld.Width && LHeroIL[idleframe].rcDst.Y >= 0)
+                        {
+                            IsOnladder = 1; // Indicate that the hero is on the ladder
+                            foreach (var hero in LHeroL)
+                                hero.rcDst.Y -= 12;
+                            foreach (var hero in LHeroR)
+                                hero.rcDst.Y -= 12;
+                            foreach (var hero in LHeroIL)
+                                hero.rcDst.Y -= 12;
+                            foreach (var hero in LHeroIR)
+                                hero.rcDst.Y -= 12;
+                            foreach (var hero in LHeroJL)
+                                hero.rcDst.Y -= 12;
+                            foreach (var hero in LHeroJR)
+                                hero.rcDst.Y -= 12;
+                            foreach (var hero in LHeroSL)
+                                hero.rcDst.Y -= 12;
+                            foreach (var hero in LHeroSR)
+                                hero.rcDst.Y -= 12;
+                        }
+                        else
+                        {
+                            IsOnladder = -1; // Reset the ladder state if not on the ladder
+                            if (LHeroIL[idleframe].rcDst.Y < groundY && !isJumping && !isJumpingLeft && !isJumpingRight)
+                            {
+                                isFallingFromLadder = true;
+                                jumpVelocity = 0;
+                            }
+                        }
+                    }
+                    if (e.KeyCode == Keys.S)
+                    {
+                        if (LHeroIL[idleframe].rcDst.X >= LLadder[0].x && LHeroIL[idleframe].rcDst.X <= LLadder[0].x + LLadder[0].wrld.Width && LHeroIL[idleframe].rcDst.Y <= groundY + 5)
+                        {
+                            IsOnladder = 1; // Indicate that the hero is on the ladder
+                            foreach (var hero in LHeroL)
+                                hero.rcDst.Y += 12;
+                            foreach (var hero in LHeroR)
+                                hero.rcDst.Y += 12;
+                            foreach (var hero in LHeroIL)
+                                hero.rcDst.Y += 12;
+                            foreach (var hero in LHeroIR)
+                                hero.rcDst.Y += 12;
+                            foreach (var hero in LHeroJL)
+                                hero.rcDst.Y += 12;
+                            foreach (var hero in LHeroJR)
+                                hero.rcDst.Y += 12;
+                            foreach (var hero in LHeroSL)
+                                hero.rcDst.Y += 12;
+                            foreach (var hero in LHeroSR)
+                                hero.rcDst.Y += 12;
+                        }
+                        else
+                        {
+                            IsOnladder = -1; // Reset the ladder state if not on the ladder
+                            if (LHeroIL[idleframe].rcDst.Y < groundY && !isJumping && !isJumpingLeft && !isJumpingRight)
+                            {
+                                isFallingFromLadder = true;
+                                jumpVelocity = 0;
+                            }
+                        }
+
 
                     }
                 }
-                else
-                {
-                    foreach (var hero in LHeroL)
-                        hero.rcDst.X -= 12;
-                    foreach (var hero in LHeroR)
-                        hero.rcDst.X -= 12;
-                    foreach (var hero in LHeroIL)
-                        hero.rcDst.X -= 12;
-                    foreach (var hero in LHeroIR)
-                        hero.rcDst.X -= 12;
-                    foreach (var hero in LHeroJL)
-                        hero.rcDst.X -= 12;
-                    foreach (var hero in LHeroJR)
-                        hero.rcDst.X -= 12;
-                }
-
-                flag1++;
-                if (flag1 == LHeroL.Count)
-                    flag1 = 0;
-                cttimer = 0;
             }
-            if (e.KeyCode == Keys.Q)
-            {
-                if (!isJumpingLeft && !isJumping && !isFalling || isShooting == 0)
-                {
-                    isJumpingLeft = true;
-                    jumpFrameLeft = 0;
-                    jumpVelocity = jumpStartVelocity;
-                    IsLeft = false;
-                    IsRight = false;
-                    LastDirectionIsRight = false;
-                }
-            }
-            if (e.KeyCode == Keys.E)
-            {
-                if (!isJumpingRight && !isJumping && !isFalling || isShooting == 0)
-                {
-                    isJumpingRight = true;
-                    jumpFrameRight = 0;
-                    jumpVelocity = jumpStartVelocity;
-                    IsLeft = false;
-                    IsRight = false;
-                    LastDirectionIsRight = true;
-                }
-            }
-            if (e.KeyCode == Keys.Left)
-            {
-                isShooting = 0; // Shooting left
-                IsLeft = true;
-                IsRight = false;
-            }
-
-
-
-
-
+           
+            
             drawdubb(this.CreateGraphics());
         }
+            
+
+
+            
+        
 
         private void Tt_Tick(object sender, EventArgs e)
         {
+            if (Lenemy3[0].rcDst.X > Llazer[0].rcDst.X + 1200)
+            {
+                if (LHeroL[flag1].rcDst.X + 500 > Llazer[0].rcDst.X)
+                {
+                    if (fenemy3 < 5)
+                    {
+                        fenemy3++;
+                    }
+                    else
+                    {
+                        fenemy3 = 0;
+                    }
+                    foreach (var enemy3 in Lenemy3)
+                        enemy3.rcDst.X -= 5;
+
+                }
+            }
+            checkbulletOnenemy2();
             cttimer++;
             //shooting logic 
             if (isShooting == 0 && cttimer % 2 == 0)
@@ -336,9 +473,34 @@ namespace Metal_Slug
                     
                 }
 
-            }
+            } //left shoot
+            if (isShooting == 1 && cttimer % 2 == 0) //right shoot
+            {
+                if (shootFrame < LHeroSR.Count - 1)
+                {
+                    shootFrame++;
+                }
+                if (shootFrame == LHeroSR.Count - 1)
+                {
+                    startshooting = true;
+                    if (LBulletR.Count > 0) 
+                    {
+                        if (LBulletR[LBulletR.Count - 1].x >= LHeroSR[shootFrame].rcDst.X + 200)
+                        {
+                            createRightBullet(); // Create a new bullet
+                        }
+                    }
+                    else if (LBulletR.Count == 0)
+                    {
+                        createRightBullet(); // Create the first bullet
+                    }
 
-            if (Lenemy2[0].rcDst.X> Llazer[0].rcDst.X+200)
+
+                }
+
+            } //right shoot
+
+            if (Lenemy2[0].rcDst.X> Llazer[0].rcDst.X)
             {
                 if (LHeroL[flag1].rcDst.X > Llazer[0].rcDst.X)
                 {
@@ -355,12 +517,23 @@ namespace Metal_Slug
 
                 }
             }
-           
 
 
 
+            if (LHeroIL[idleframe].rcDst.X >= LLadder[0].x && LHeroIL[idleframe].rcDst.X <= LLadder[0].x + LLadder[0].wrld.Width && LHeroIL[idleframe].rcDst.Y <= groundY + 5)
+            {
+              
+            }
+            else
+            {
+                IsOnladder = -1;
+                if (LHeroIL[idleframe].rcDst.Y < groundY && !isJumping && !isJumpingLeft && !isJumpingRight)
+                {
+                    isFallingFromLadder = true;
+                }
+            }
 
-            for(int i = 0; i < LBulletL.Count; i++)
+            for (int i = 0; i < LBulletL.Count; i++)
             {
                 if (LBulletL[i].x <= 0)
                 {
@@ -370,6 +543,18 @@ namespace Metal_Slug
                 else
                 {
                     LBulletL[i].x -= 10;
+                }
+            }
+            for (int i = 0; i < LBulletR.Count; i++)
+            {
+                if (LBulletR[i].x >= this.ClientSize.Width)
+                {
+                    LBulletR.RemoveAt(i);
+                    i--;
+                }
+                else
+                {
+                    LBulletR[i].x += 10;
                 }
             }
             if (!IsLeft && !IsRight && !isJumpingLeft && cttimer % 5 == 0)
@@ -401,7 +586,7 @@ namespace Metal_Slug
                 }
             }
 
-            if(cttimer%30==0 && LEnemyR[flag2].f!=1)
+            if(cttimer%10==0 && LEnemyR[flag2].f!=1)
             {
                 CMultiImageActor pnn = new CMultiImageActor();
                 pnn.wrld = new Bitmap("Assets/enemy/7.png");
@@ -452,6 +637,9 @@ namespace Metal_Slug
                         hero.rcDst.X = LHeroJL[0].rcDst.X;
                     foreach (var hero in LHeroSL)
                         hero.rcDst.X = LHeroJL[0].rcDst.X;
+                    foreach (var hero in LHeroSR)
+                        hero.rcDst.X = LHeroJL[0].rcDst.X;
+                    Lwrld[0].rcSrc.X -=12 ; // Adjust world position to match hero position
 
 
 
@@ -500,6 +688,54 @@ namespace Metal_Slug
                     cttimer = 0;
                 }
             }
+            if (isFallingFromLadder)
+            {
+                
+                foreach (var hero in LHeroIL)
+                    hero.rcDst.Y += (int)jumpVelocity;
+                foreach (var hero in LHeroIR)
+                    hero.rcDst.Y += (int)jumpVelocity;
+                foreach (var hero in LHeroJL)
+                    hero.rcDst.Y += (int)jumpVelocity;
+                foreach (var hero in LHeroJR)
+                    hero.rcDst.Y += (int)jumpVelocity;
+                foreach (var hero in LHeroSL)
+                    hero.rcDst.Y += (int)jumpVelocity;
+                foreach (var hero in LHeroSR)
+                    hero.rcDst.Y += (int)jumpVelocity;
+
+
+                jumpVelocity += gravity;
+
+                // Stop falling when reaching the ground
+                if (LHeroIL[0].rcDst.Y >= groundY)
+                {
+                    foreach (var hero in LHeroIL)
+                        hero.rcDst.Y = groundY;
+                    foreach (var hero in LHeroIR)
+                        hero.rcDst.Y = groundY;
+                    isFallingFromLadder = false;
+                    jumpVelocity = 0;
+
+
+                    foreach (var hero in LHeroJR)
+                        hero.rcDst.Y = groundY;
+                    foreach (var hero in LHeroR)
+                        hero.rcDst.Y = groundY;
+                    foreach (var hero in LHeroL)
+                        hero.rcDst.Y = groundY;
+                    foreach (var hero in LHeroIL)
+                        hero.rcDst.Y = groundY;
+                    foreach (var hero in LHeroIR)
+                        hero.rcDst.Y = groundY;
+                    foreach (var hero in LHeroJL)
+                        hero.rcDst.Y = groundY;
+                    foreach (var hero in LHeroSL)
+                        hero.rcDst.Y = groundY;
+                    foreach (var hero in LHeroSR)
+                        hero.rcDst.Y = groundY;
+                }
+            }
             slowdownspedd++;
 
             if (Heightlaser <= groundY && laserflag == 0)
@@ -519,11 +755,44 @@ namespace Metal_Slug
                 }
             }
 
+            if (LHeroIR[idleframe].rcDst.X >= LPlatform[0].x && LHeroIR[idleframe].rcDst.X <= LPlatform[0].x + LPlatform[0].wrld.Width)
+            {
+                if(flagplatform ==0)
+                {
+                    flagelevator = true;
+
+                    LPlatform[0].x += 5; // Move the platform to the right
+
+                    foreach (var hero in LHeroR)
+                        hero.rcDst.X += 5;
+                    foreach (var hero in LHeroL)
+                        hero.rcDst.X += 5;
+                    foreach (var hero in LHeroIL)
+                        hero.rcDst.X += 5;
+                    foreach (var hero in LHeroIR)
+                        hero.rcDst.X += 5;
+                    foreach (var hero in LHeroJL)
+                        hero.rcDst.X += 5;
+                    foreach (var hero in LHeroJR)
+                        hero.rcDst.X += 5;
+                    foreach (var hero in LHeroSL)
+                        hero.rcDst.X += 5;
+                    foreach (var hero in LHeroSR)
+                        hero.rcDst.X += 5;
+                    if (Lwrld[0].rcSrc.X < Lwrld[0].wrld.Width - Lwrld[0].rcSrc.Width - 10)
+                    {
+                        Lwrld[0].rcSrc.X += 12;
+
+                    }
+                }
+      
+            }
+
 
             drawdubb(this.CreateGraphics());
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        void Form1_Load(object sender, EventArgs e)
         {
             this.Location = new Point(0, this.ClientSize.Height / 2);
             off = new Bitmap(this.ClientSize.Width, this.ClientSize.Height);
@@ -538,14 +807,21 @@ namespace Metal_Slug
             createlazer();
             createHeroShootingLeft();
             createnemy2();
-            
+            createHeroShootingRight();
+            createPlatform();
+            platformStartX = LPlatform[0].x;
+            platformEndX = Lwrld[0].wrld.Width - LPlatform[0].wrld.Width - 30;
+            maxMapScroll = Lwrld[0].wrld.Width - Lwrld[0].rcSrc.Width;
+            createladder();
+            createnemy3();
+
+
 
         }
-        private void Form1_Paint(object sender, PaintEventArgs e)
+        void Form1_Paint(object sender, PaintEventArgs e)
         {
             drawdubb(e.Graphics);
         }
-
         void createnemy2()
         {
             //1
@@ -559,14 +835,14 @@ namespace Metal_Slug
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/9.png");
             pnn.rcSrc = new Rectangle(140, 0, 140, 100);
-            pnn.rcDst = new Rectangle(300, 280, 140, 100);
+            pnn.rcDst = new Rectangle(1500, 280, 140, 100);
             Lenemy2.Add(pnn);
 
             //3
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/9.png");
             pnn.rcSrc = new Rectangle(280, 0, 120, 100);
-            pnn.rcDst = new Rectangle(300, 280, 120, 100);
+            pnn.rcDst = new Rectangle(1500, 280, 120, 100);
             Lenemy2.Add(pnn);
 
 
@@ -574,7 +850,7 @@ namespace Metal_Slug
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/9.png");
             pnn.rcSrc = new Rectangle(400, 0, 120, 100);
-            pnn.rcDst = new Rectangle(300, 280, 120, 100);
+            pnn.rcDst = new Rectangle(1500, 280, 120, 100);
             Lenemy2.Add(pnn);
 
 
@@ -582,7 +858,7 @@ namespace Metal_Slug
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/9.png");
             pnn.rcSrc = new Rectangle(510, 0, 120, 100);
-            pnn.rcDst = new Rectangle(300, 280, 120, 100);
+            pnn.rcDst = new Rectangle(1500, 280, 120, 100);
             Lenemy2.Add(pnn);
 
 
@@ -590,14 +866,14 @@ namespace Metal_Slug
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/9.png");
             pnn.rcSrc = new Rectangle(630, 0, 120, 100);
-            pnn.rcDst = new Rectangle(300, 280, 120, 100);
+            pnn.rcDst = new Rectangle(1500, 280, 120, 100);
             Lenemy2.Add(pnn);
 
             //7
              pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/9.png");
             pnn.rcSrc = new Rectangle(750, 0, 150, 100);
-            pnn.rcDst = new Rectangle(300, 280, 150, 100);
+            pnn.rcDst = new Rectangle(1500, 280, 150, 100);
             Lenemy2.Add(pnn);
 
 
@@ -605,7 +881,7 @@ namespace Metal_Slug
              pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/9.png");
             pnn.rcSrc = new Rectangle(900, 0, 150, 100);
-            pnn.rcDst = new Rectangle(300, 280, 150, 100);
+            pnn.rcDst = new Rectangle(1500, 280, 150, 100);
             Lenemy2.Add(pnn);
 
 
@@ -615,7 +891,7 @@ namespace Metal_Slug
              pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/9.png");
             pnn.rcSrc = new Rectangle(0, 100, 140, 58);
-            pnn.rcDst = new Rectangle(300, 310, 140, 58);
+            pnn.rcDst = new Rectangle(1500, 310, 140, 58);
             Lenemy2.Add(pnn);
 
 
@@ -623,14 +899,14 @@ namespace Metal_Slug
              pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/9.png");
             pnn.rcSrc = new Rectangle(140, 100, 120, 58);
-            pnn.rcDst = new Rectangle(300, 310, 120, 58);
+            pnn.rcDst = new Rectangle(1500, 310, 120, 58);
             Lenemy2.Add(pnn);
 
             //11
              pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/9.png");
             pnn.rcSrc = new Rectangle(260, 80, 120, 70);
-            pnn.rcDst = new Rectangle(300, 280, 120, 70);
+            pnn.rcDst = new Rectangle(1500, 280, 120, 70);
             Lenemy2.Add(pnn);
 
 
@@ -638,15 +914,10 @@ namespace Metal_Slug
              pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/9.png");
             pnn.rcSrc = new Rectangle(380, 80, 120, 70);
-            pnn.rcDst = new Rectangle(300, 280, 120, 70);
+            pnn.rcDst = new Rectangle(1500, 280, 120, 70);
             Lenemy2.Add(pnn);
         }
-
-
-
-
-
-        private void createworld()
+        void createworld()
         {
             CAdvImgActor pnn = new CAdvImgActor();
             pnn.wrld = new Bitmap("Assets/maps/Level1.png");
@@ -654,8 +925,6 @@ namespace Metal_Slug
             pnn.rcDst = new Rectangle(0, 0, this.ClientSize.Width, 400);
             Lwrld.Add(pnn);
         }
-
-        
         void creatEnemyRight()
         {
             //1
@@ -745,7 +1014,6 @@ namespace Metal_Slug
             pnn.rcDst = new Rectangle(LEnemyR[flag2].rcDst.X, LEnemyR[flag2].rcDst.Y + 20, 20, 20);
             Lboom.Add(pnn);
         }
-
         void createlazer()
         {
 
@@ -795,8 +1063,7 @@ namespace Metal_Slug
             //Llazerfire.Add(pnn);
 
         }
-
-        private void createHeroRight()
+        void createHeroRight()
         {
             //first half of right
             CMultiImageActor pnn = new CMultiImageActor();
@@ -861,7 +1128,7 @@ namespace Metal_Slug
             pnn.rcDst = new Rectangle(100, 250, 150, 120);
             LHeroR.Add(pnn);
         }
-        private void createHeroLeft()
+        void createHeroLeft()
         {
             //start of left half
             CMultiImageActor pnn = new CMultiImageActor();
@@ -938,7 +1205,7 @@ namespace Metal_Slug
             pnn.rcDst = new Rectangle(100, 250, 150, 120);
             LHeroL.Add(pnn);
         }
-        private void createHeroIdleLeft()
+        void createHeroIdleLeft()
         {
             CMultiImageActor pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/1.png");
@@ -964,7 +1231,7 @@ namespace Metal_Slug
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroIL.Add(pnn);
         }
-        private void createHeroIdleRight()
+        void createHeroIdleRight()
         {
             CMultiImageActor pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
@@ -990,7 +1257,7 @@ namespace Metal_Slug
             pnn.rcDst = new Rectangle(100, 248, 150, 120);
             LHeroIR.Add(pnn);
         }
-        private void createHeroJumpLeft()
+        void createHeroJumpLeft()
         {
             CMultiImageActor pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/1.png");
@@ -1052,7 +1319,7 @@ namespace Metal_Slug
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroJL.Add(pnn);
         }
-        private void createHeroJumpRight()
+        void createHeroJumpRight()
         {
             CMultiImageActor pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/2.png");
@@ -1114,7 +1381,7 @@ namespace Metal_Slug
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroJR.Add(pnn);
         }
-        private void createHeroShootingLeft()
+        void createHeroShootingLeft()
         {
             //first half of left shooting
 
@@ -1240,7 +1507,131 @@ namespace Metal_Slug
             pnn.rcDst = new Rectangle(100, 245, 150, 120);
             LHeroSL.Add(pnn);
         }
-        private void createLeftBullet()
+        void createHeroShootingRight()
+        {
+            CMultiImageActor pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 70, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 140, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 205, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 270, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 340, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 400, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 460, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 530, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 600, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 660, 650, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            //second half of right shooting
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 75, 710, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 140, 710, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 205, 710, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 275, 710, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 345, 710, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 415, 710, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 480, 710, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 540, 710, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 600, 710, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/2.png");
+            pnn.rcSrc = new Rectangle(pnn.wrld.Width - 670, 710, 60, 50);
+            pnn.rcDst = new Rectangle(100, 250, 150, 120);
+            LHeroSR.Add(pnn);
+        }
+        void createLeftBullet()
         {
             CImageActor pnn = new CImageActor();
             pnn.wrld = new Bitmap("Assets/Hero/b.png");
@@ -1250,8 +1641,67 @@ namespace Metal_Slug
             LBulletL.Add(pnn);
 
         }
+        void createRightBullet()
+        {
+            CImageActor pnn = new CImageActor();
+            pnn.wrld = new Bitmap("Assets/Hero/b.png");
+            pnn.wrld.MakeTransparent(Color.White);
+            pnn.x = LHeroSL[LHeroSR.Count - 1].rcDst.X + LHeroSR[LHeroSR.Count - 1].rcDst.Width;
+            pnn.y = LHeroSL[LHeroSR.Count - 1].rcDst.Y + 45;
+            LBulletR.Add(pnn);
 
+        }
+        void createPlatform()
+        {
+            CImageActor pnn = new CImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/6.png");
+            pnn.wrld.MakeTransparent(Color.White);
+            pnn.x = Lwrld[0].wrld.Width+ 260;
+            pnn.y = 355;
+            LPlatform.Add(pnn);
 
+        }
+        void createladder()
+        {
+            CImageActor pnn = new CImageActor();
+            pnn.wrld = new Bitmap("Assets/Maps/L.png");
+            pnn.wrld.MakeTransparent(Color.White);
+            pnn.x = 2000;
+            pnn.y = 0;
+            LLadder.Add(pnn);
+
+        }
+        void checkbulletOnenemy2()
+        {
+            for (int i = LBulletR.Count - 1; i >= 0; i--)
+            {
+                CImageActor bullet = LBulletR[i];
+                // Check all frames of enemy 2 (assuming enemy 2 is all frames in Lenemy2)
+                for (int e = 0; e < Lenemy2.Count; e++)
+                {
+                    if (Lenemy2[e].f == 0) // Only check if alive
+                    {
+                        Rectangle enemyRect = Lenemy2[e].rcDst;
+                        Rectangle bulletRect = new Rectangle(bullet.x, bullet.y, bullet.wrld.Width, bullet.wrld.Height);
+                        if (enemyRect.IntersectsWith(bulletRect))
+                        {
+                            // Mark all frames as dead
+                            for (int j = 0; j < Lenemy2.Count; j++)
+                                Lenemy2[j].f = 1;
+                            // Remove the bullet
+                            LBulletR.RemoveAt(i);
+                            return; // Only kill once per bullet
+                        }
+                    }
+                }
+            }
+        }
+        private void drawdubb(Graphics g)
+        {
+            Graphics g2 = Graphics.FromImage(off);
+            drawscene(g2);
+            g.DrawImage(off, 0, 0);
+        }
         private void drawscene(Graphics g2)
         {
             g2.Clear(Color.White);
@@ -1260,11 +1710,15 @@ namespace Metal_Slug
                 CAdvImgActor ptrav = Lwrld[i];
                 g2.DrawImage(ptrav.wrld, ptrav.rcDst, ptrav.rcSrc, GraphicsUnit.Pixel);
             }
-
+            g2.DrawImage(LLadder[0].wrld, LLadder[0].x, LLadder[0].y, 250, 400); //draw ladder
             // Only draw the hero if not shooting
             if (isShooting == 0)
             {
                 g2.DrawImage(LHeroSL[shootFrame].wrld, LHeroSL[shootFrame].rcDst, LHeroSL[shootFrame].rcSrc, GraphicsUnit.Pixel); // shooting left
+            }
+            else if (isShooting == 1)
+            {
+                g2.DrawImage(LHeroSR[shootFrame].wrld, LHeroSR[shootFrame].rcDst, LHeroSR[shootFrame].rcSrc, GraphicsUnit.Pixel); // shooting right
             }
             else if (isJumpingLeft)
             {
@@ -1301,6 +1755,12 @@ namespace Metal_Slug
                 g2.DrawImage(bullet.wrld, bullet.x, bullet.y, 70, 60); //draw bullet
 
             }
+            for (int i = 0; i < LBulletR.Count; i++)
+            {
+                CImageActor bullet = LBulletR[i];
+                g2.DrawImage(bullet.wrld, bullet.x, bullet.y, 70, 60); //draw bullet
+
+            }
             for (int i = 0; i < Lboom.Count; i++)
             {
                 CMultiImageActor boom = Lboom[i];
@@ -1308,17 +1768,65 @@ namespace Metal_Slug
                     g2.DrawImage(boom.wrld, boom.rcDst, boom.rcSrc, GraphicsUnit.Pixel);
             }
 
-            
+            g2.DrawImage(LPlatform[0].wrld, LPlatform[0].x, LPlatform[0].y, 150, 50); //draw platform
+            if (Lenemy2.Count > 0 && Lenemy2[0].f == 0)
                 g2.DrawImage(Lenemy2[fenemy2].wrld, Lenemy2[fenemy2].rcDst, Lenemy2[fenemy2].rcSrc, GraphicsUnit.Pixel);
+            g2.DrawImage(Lenemy3[fenemy3].wrld, Lenemy3[fenemy3].rcDst, Lenemy3[fenemy3].rcSrc, GraphicsUnit.Pixel);
+
 
         }
-
-        private void drawdubb(Graphics g)
+        void createnemy3()
         {
-            Graphics g2 = Graphics.FromImage(off);
-            drawscene(g2);
-            g.DrawImage(off, 0, 0);
+            //1
+            CMultiImageActor pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/12.png");
+            pnn.rcSrc = new Rectangle(0, 0, 120, 90);
+            pnn.rcDst = new Rectangle(3000, 270, 120, 90);
+            Lenemy3.Add(pnn);
+
+            //2
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/12.png");
+            pnn.rcSrc = new Rectangle(110, 0, 120, 90);
+            pnn.rcDst = new Rectangle(3000, 270, 120, 90);
+            Lenemy3.Add(pnn);
+
+
+            //3
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/12.png");
+            pnn.rcSrc = new Rectangle(230, 0, 120, 90);
+            pnn.rcDst = new Rectangle(3000, 270, 120, 90);
+            Lenemy3.Add(pnn);
+
+
+            //4
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/12.png");
+            pnn.rcSrc = new Rectangle(345, 0, 120, 90);
+            pnn.rcDst = new Rectangle(3000, 270, 120, 90);
+            Lenemy3.Add(pnn);
+
+
+
+            //5
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/12.png");
+            pnn.rcSrc = new Rectangle(460, 0, 120, 90);
+            pnn.rcDst = new Rectangle(3000, 270, 120, 90);
+            Lenemy3.Add(pnn);
+
+
+            //6
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/12.png");
+            pnn.rcSrc = new Rectangle(575, 0, 120, 90);
+            pnn.rcDst = new Rectangle(3000, 270, 120, 90);
+            Lenemy3.Add(pnn);
+
         }
+
+
     }
     public class CAdvImgActor
     {
