@@ -28,6 +28,9 @@ namespace Metal_Slug
         List<CMultiImageActor> LHeroSL = new List<CMultiImageActor>(); // hero shoot left
         List<CImageActor> LBulletL = new List<CImageActor>(); // Left Bullet  
         List<Cactor> lazer = new List<Cactor>(); // actors for lazer fire
+        List<CMultiImageActor> Lboom = new List<CMultiImageActor>();
+        List<CMultiImageActor> Lenemy2 = new List<CMultiImageActor>();
+
 
 
 
@@ -60,6 +63,8 @@ namespace Metal_Slug
         public int shootFrame = 0;
         public bool startshooting = false;
         public int startstairs = 0;
+        public int fenemy2 = 0;
+
 
 
 
@@ -147,10 +152,22 @@ namespace Metal_Slug
                     foreach (var bullet in LBulletL)
                         bullet.x -= 12;
 
+                    if (LHeroL[flag1].rcDst.X > Llazer[0].rcDst.X)
+                    {
+                        foreach (var enemy2 in Lenemy2)
+                            enemy2.rcDst.X -= 16;
+                    }
+
                     //foreach (var lazer in Llazerfire)
                     //    lazer.rcDst.X -= 16;
 
                     lazer[0].x -= 16; // Adjust the position of the lazer actor
+
+                    foreach (var boom in Lboom)
+                    {
+                        boom.rcDst.X -= 16;
+
+                    }
                 }
                 else
                 {
@@ -220,6 +237,17 @@ namespace Metal_Slug
                         lazer.rcDst.X += 16;
 
                     lazer[0].x += 16;
+                    if (LHeroL[flag1].rcDst.X > Llazer[0].rcDst.X)
+                    {
+                        foreach (var enemy2 in Lenemy2)
+                            enemy2.rcDst.X += 16;
+                    }
+
+                    foreach (var boom in Lboom)
+                    {
+                        boom.rcDst.X += 16;
+
+                    }
                 }
                 else
                 {
@@ -309,6 +337,29 @@ namespace Metal_Slug
                 }
 
             }
+
+            if (Lenemy2[0].rcDst.X> Llazer[0].rcDst.X+200)
+            {
+                if (LHeroL[flag1].rcDst.X > Llazer[0].rcDst.X)
+                {
+                    if (fenemy2 < 11)
+                    {
+                        fenemy2++;
+                    }
+                    else
+                    {
+                        fenemy2 = 0;
+                    }
+                    foreach (var enemy2 in Lenemy2)
+                        enemy2.rcDst.X -= 5;
+
+                }
+            }
+           
+
+
+
+
             for(int i = 0; i < LBulletL.Count; i++)
             {
                 if (LBulletL[i].x <= 0)
@@ -336,6 +387,7 @@ namespace Metal_Slug
             {
                 foreach (var enemy in LEnemyR)
                     enemy.rcDst.X += 7;
+                
             }
             flag2++;
             if (flag2 == LEnemyR.Count)
@@ -343,10 +395,28 @@ namespace Metal_Slug
 
             foreach (var enemy in LEnemyR)
             {
-                if (deathenenmy1 <= enemy.rcDst.X + enemy.rcDst.Width)
+                if (deathenenmy1+2200 <= enemy.rcDst.X + enemy.rcDst.Width+700)
                 {
                     enemy.f = 1;
                 }
+            }
+
+            if(cttimer%30==0 && LEnemyR[flag2].f!=1)
+            {
+                CMultiImageActor pnn = new CMultiImageActor();
+                pnn.wrld = new Bitmap("Assets/enemy/7.png");
+                pnn.rcSrc = new Rectangle(0, 0, 49, 52);
+                pnn.rcDst = new Rectangle(LEnemyR[flag2].rcDst.X+20, LEnemyR[flag2].rcDst.Y+20, 20, 20);
+                Lboom.Add(pnn);
+ 
+            }
+            foreach (var boom in Lboom)
+            {
+                if(boom.rcDst.Y< LHeroR[flag].rcDst.Y+80)
+                    boom.rcDst.Y += 7;
+                else
+                    boom.f = 1;
+
             }
 
             if (isJumpingLeft)
@@ -467,6 +537,7 @@ namespace Metal_Slug
             createHeroJumpRight();
             createlazer();
             createHeroShootingLeft();
+            createnemy2();
             
 
         }
@@ -474,6 +545,103 @@ namespace Metal_Slug
         {
             drawdubb(e.Graphics);
         }
+
+        void createnemy2()
+        {
+            //1
+            CMultiImageActor pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/9.png");
+            pnn.rcSrc = new Rectangle(0, 0, 140, 100);
+            pnn.rcDst = new Rectangle(1500, 280, 140, 100);
+            Lenemy2.Add(pnn);
+
+            //2
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/9.png");
+            pnn.rcSrc = new Rectangle(140, 0, 140, 100);
+            pnn.rcDst = new Rectangle(300, 280, 140, 100);
+            Lenemy2.Add(pnn);
+
+            //3
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/9.png");
+            pnn.rcSrc = new Rectangle(280, 0, 120, 100);
+            pnn.rcDst = new Rectangle(300, 280, 120, 100);
+            Lenemy2.Add(pnn);
+
+
+            //4
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/9.png");
+            pnn.rcSrc = new Rectangle(400, 0, 120, 100);
+            pnn.rcDst = new Rectangle(300, 280, 120, 100);
+            Lenemy2.Add(pnn);
+
+
+            //5
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/9.png");
+            pnn.rcSrc = new Rectangle(510, 0, 120, 100);
+            pnn.rcDst = new Rectangle(300, 280, 120, 100);
+            Lenemy2.Add(pnn);
+
+
+            //6
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/9.png");
+            pnn.rcSrc = new Rectangle(630, 0, 120, 100);
+            pnn.rcDst = new Rectangle(300, 280, 120, 100);
+            Lenemy2.Add(pnn);
+
+            //7
+             pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/9.png");
+            pnn.rcSrc = new Rectangle(750, 0, 150, 100);
+            pnn.rcDst = new Rectangle(300, 280, 150, 100);
+            Lenemy2.Add(pnn);
+
+
+            //8
+             pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/9.png");
+            pnn.rcSrc = new Rectangle(900, 0, 150, 100);
+            pnn.rcDst = new Rectangle(300, 280, 150, 100);
+            Lenemy2.Add(pnn);
+
+
+
+
+            //9
+             pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/9.png");
+            pnn.rcSrc = new Rectangle(0, 100, 140, 58);
+            pnn.rcDst = new Rectangle(300, 310, 140, 58);
+            Lenemy2.Add(pnn);
+
+
+            //10
+             pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/9.png");
+            pnn.rcSrc = new Rectangle(140, 100, 120, 58);
+            pnn.rcDst = new Rectangle(300, 310, 120, 58);
+            Lenemy2.Add(pnn);
+
+            //11
+             pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/9.png");
+            pnn.rcSrc = new Rectangle(260, 80, 120, 70);
+            pnn.rcDst = new Rectangle(300, 280, 120, 70);
+            Lenemy2.Add(pnn);
+
+
+            //12
+             pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/9.png");
+            pnn.rcSrc = new Rectangle(380, 80, 120, 70);
+            pnn.rcDst = new Rectangle(300, 280, 120, 70);
+            Lenemy2.Add(pnn);
+        }
+
 
 
 
@@ -486,87 +654,96 @@ namespace Metal_Slug
             pnn.rcDst = new Rectangle(0, 0, this.ClientSize.Width, 400);
             Lwrld.Add(pnn);
         }
+
+        
         void creatEnemyRight()
         {
             //1
             CMultiImageActor pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/2.png");
             pnn.rcSrc = new Rectangle(0, 0, 150, 120);
-            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            pnn.rcDst = new Rectangle(480, 150, 114, 70);
             LEnemyR.Add(pnn);
             //2
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/2.png");
             pnn.rcSrc = new Rectangle(120, 0, 150, 120);
-            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            pnn.rcDst = new Rectangle(480, 150, 114, 70);
             LEnemyR.Add(pnn);
             //3
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/2.png");
             pnn.rcSrc = new Rectangle(250, 0, 150, 120);
-            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            pnn.rcDst = new Rectangle(480, 150, 114, 70);
             LEnemyR.Add(pnn);
             //4
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/2.png");
             pnn.rcSrc = new Rectangle(380, 0, 150, 120);
-            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            pnn.rcDst = new Rectangle(480, 150, 114, 70);
             LEnemyR.Add(pnn);
             //5
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/2.png");
             pnn.rcSrc = new Rectangle(510, 0, 150, 120);
-            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            pnn.rcDst = new Rectangle(480, 150, 114, 70);
             LEnemyR.Add(pnn);
 
             //6
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/2.png");
             pnn.rcSrc = new Rectangle(650, 0, 150, 120);
-            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            pnn.rcDst = new Rectangle(480, 150, 114, 70);
             LEnemyR.Add(pnn);
 
             //7
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/2.png");
             pnn.rcSrc = new Rectangle(780, 0, 150, 120);
-            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            pnn.rcDst = new Rectangle(480, 150, 114, 70);
             LEnemyR.Add(pnn);
 
             //8
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/2.png");
             pnn.rcSrc = new Rectangle(910, 0, 150, 120);
-            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            pnn.rcDst = new Rectangle(480, 150, 114, 70);
             LEnemyR.Add(pnn);
 
             //9
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/2.png");
             pnn.rcSrc = new Rectangle(510, 120, 150, 120);
-            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            pnn.rcDst = new Rectangle(480, 150, 114, 70);
             LEnemyR.Add(pnn);
 
             //10
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/2.png");
             pnn.rcSrc = new Rectangle(650, 120, 150, 120);
-            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            pnn.rcDst = new Rectangle(480, 150, 114, 70);
             LEnemyR.Add(pnn);
 
             //11
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/2.png");
             pnn.rcSrc = new Rectangle(780, 120, 150, 120);
-            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            pnn.rcDst = new Rectangle(480, 150, 114, 70);
             LEnemyR.Add(pnn);
 
             //12
             pnn = new CMultiImageActor();
             pnn.wrld = new Bitmap("Assets/enemy/2.png");
             pnn.rcSrc = new Rectangle(910, 120, 150, 120);
-            pnn.rcDst = new Rectangle(0, 150, 114, 70);
+            pnn.rcDst = new Rectangle(480, 150, 114, 70);
             LEnemyR.Add(pnn);
+
+
+            pnn = new CMultiImageActor();
+            pnn.wrld = new Bitmap("Assets/enemy/7.png");
+            pnn.rcSrc = new Rectangle(0, 0, 49, 52);
+            pnn.rcDst = new Rectangle(LEnemyR[flag2].rcDst.X, LEnemyR[flag2].rcDst.Y + 20, 20, 20);
+            Lboom.Add(pnn);
         }
 
         void createlazer()
@@ -1124,10 +1301,15 @@ namespace Metal_Slug
                 g2.DrawImage(bullet.wrld, bullet.x, bullet.y, 70, 60); //draw bullet
 
             }
-            
-                
-            
+            for (int i = 0; i < Lboom.Count; i++)
+            {
+                CMultiImageActor boom = Lboom[i];
+                if(boom.f!=1)
+                    g2.DrawImage(boom.wrld, boom.rcDst, boom.rcSrc, GraphicsUnit.Pixel);
+            }
 
+            
+                g2.DrawImage(Lenemy2[fenemy2].wrld, Lenemy2[fenemy2].rcDst, Lenemy2[fenemy2].rcSrc, GraphicsUnit.Pixel);
 
         }
 
